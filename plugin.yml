@@ -1,0 +1,18 @@
+main: com.penguinchao.etherhomes.EtherHomes
+version: 1.0
+name: EtherHomes
+author: Penguinchao
+commands:
+    home:
+        description: Go to your default home. Use /home [name] to go to a named home
+    sethome:
+        description: Set default home. Use /sethome [name] to set a named home
+    listhomes:
+        description: List player homes. /listhomes [player] to list someone else's homes
+    deletehome:
+        description: Delete a named home
+permissions:
+    etherhomes.other.visit:
+        default: op
+    etherhomes.other.set:
+        default: op
