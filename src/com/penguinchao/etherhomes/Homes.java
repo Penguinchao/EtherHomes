@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,6 +21,7 @@ import org.bukkit.command.CommandSender;
 public class Homes {
 	private EtherHomes main;
 	private Connection connection;
+        private boolean couldConnect;
 	public Homes(EtherHomes passedHomes){
 		main = passedHomes;
 		establishConnection();
@@ -26,6 +29,7 @@ public class Homes {
 	}
 	public Location getHomeLocation(UUID player, String homeName){
 		//returns null if home does not exist
+                checkConnection();
 		if(player == null){
 			return null;
 		}else if(homeName == null){
@@ -67,6 +71,7 @@ public class Homes {
 		return null;
 	}
 	protected void setHomeLocation(Location newLocation, UUID homeOwner, String homeName){
+                checkConnection();
 		if(homeOwner == null){
 			return;
 		}else if(homeName == null){
@@ -96,6 +101,7 @@ public class Homes {
 		
 	}
 	protected void deleteHomeLocation(UUID homeOwner, String homeName){
+                checkConnection();
 		boolean homeExists = false;
 		if(homeOwner == null){
 			return;
@@ -125,6 +131,7 @@ public class Homes {
 		if(player == null){
 			return null;
 		}
+                checkConnection();
 		String query = "SELECT `homename` FROM `etherhomes_homes` WHERE `uuid` = '"+player.toString()+"' ORDER BY `homename` ASC ";
 		List<String> returnMe = new ArrayList<String>();
 		try {
@@ -174,9 +181,11 @@ public class Homes {
 		String dburl = "jdbc:mysql://" + mysqlHostName + ":" + mysqlPort + "/" + mysqlDatabase;
 		try{
 			connection = DriverManager.getConnection(dburl, mysqlUsername, mysqlPassword);
+                        couldConnect = true;
 		}catch(Exception exception){
 			main.getLogger().info("[ERROR] Could not connect to the database -- disabling EtherBoosts");
 			Bukkit.getPluginManager().disablePlugin(main);
+                        couldConnect =false;
 		}
 	}
 	private void checkTables(){
@@ -189,4 +198,16 @@ public class Homes {
 			e.printStackTrace();
 		}
 	}
+        private void checkConnection(){
+            if(!couldConnect){
+                return;
+            }
+            try {
+                if(connection.isClosed()){
+                    establishConnection();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(Homes.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 }
